@@ -1,5 +1,7 @@
 package net.sf.theora_java.jna;
 
+import java.util.List;
+
 import com.sun.jna.Library;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
@@ -34,5 +36,11 @@ public interface XiphLibrary extends Library {
          */
         public long /* ogg_int64_t */ packetno;
 
+        public ogg_packet() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("packet", "bytes", "b_o_s", "e_o_s", "granulepos", "packetno");
+        }
     }
 }

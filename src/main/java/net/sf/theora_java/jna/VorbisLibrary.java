@@ -13,6 +13,8 @@
 
 package net.sf.theora_java.jna;
 
+import java.util.List;
+
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
@@ -115,6 +117,15 @@ public interface VorbisLibrary extends XiphLibrary {
         public long /* ogg_int64_t */ res_bits;
 
         public Pointer /* void* */ backend_state;
+
+        public vorbis_dsp_state() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("analysisp", "vi", "pcm", "pcmret", "pcm_storage", "pcm_current", "pcm_returned",
+                    "preextrapolate", "eofflag", "lW", "W", "nW", "centerW", "granulepos", "sequence", "glue_bits",
+                    "time_bits", "floor_bits", "res_bits", "backend_state");
+        }
     }
 
     /** necessary stream state for linking to the framing abstraction */
@@ -151,7 +162,14 @@ public interface VorbisLibrary extends XiphLibrary {
 
         public Pointer /*void**/ internal;
 
+        public vorbis_block() {}
 
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("pcm", "opb", "lW", "W", "nW", "pcmend", "mode", "eofflag", "granulepos",
+                    "sequence", "vd", "localstore", "localtop", "localalloc", "totaluse", "reap", "glue_bits",
+                    "time_bits", "floor_bits", "res_bits", "internal");
+        }
     }
 
     /**
@@ -165,6 +183,12 @@ public interface VorbisLibrary extends XiphLibrary {
         public Pointer /*void**/ ptr;
         public Pointer /*struct alloc_chain **/ next;
 
+        public alloc_chain() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("ptr", "next");
+        }
     }
 
     /**
@@ -185,6 +209,12 @@ public interface VorbisLibrary extends XiphLibrary {
         public int comments;
         public Pointer /*char  **/ vendor;
 
+        public vorbis_comment() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("user_comments", "comment_lengths", "comments", "vendor");
+        }
     }
 
     /** libvorbis encodes in two abstraction layers; first we perform DSP
@@ -386,6 +416,13 @@ public interface VorbisLibrary extends XiphLibrary {
         public double bitrate_av_window;
         public double bitrate_av_window_center;
 
+        public ovectl_ratemanage_arg() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("management_active", "bitrate_hard_min", "bitrate_hard_max", "bitrate_hard_window",
+                    "bitrate_av_lo", "bitrate_av_hi", "bitrate_av_window", "bitrate_av_window_center");
+        }
     }
 
     /* new rate setup */
@@ -403,6 +440,15 @@ public interface VorbisLibrary extends XiphLibrary {
 
         public NativeLong /*long*/   bitrate_average_kbps;
         public double bitrate_average_damping;
+
+        public ovectl_ratemanage2_arg() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("management_active", "bitrate_limit_min_kbps", "bitrate_limit_max_kbps",
+                    "bitrate_limit_reservoir_bits", "bitrate_limit_reservoir_bias", "bitrate_average_kbps",
+                    "bitrate_average_damping");
+        }
     }
 
 
@@ -465,6 +511,13 @@ public interface VorbisLibrary extends XiphLibrary {
         public Pointer seek_func;//int    (*seek_func)  (void *datasource, long /*ogg_int64_t*/ offset, int whence);
         public Pointer close_func;//int    (*close_func) (void *datasource);
         public Pointer tell_func;//long   (*tell_func)  (void *datasource);
+
+        public ov_callbacks() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("read_func", "seek_func", "close_func", "tell_func");
+        }
     }
 
     int NOTOPEN = 0;
@@ -510,6 +563,14 @@ public interface VorbisLibrary extends XiphLibrary {
 
         public ov_callbacks callbacks;
 
+        public OggVorbis_File() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("datasource", "seekable", "offset", "end", "oy", "links", "offsets", "dataoffsets",
+                    "serialnos", "pcmlengths", "vi", "vc", "pcm_offset", "ready_state", "current_serialno",
+                    "current_link", "bittrack", "samptrack", "os", "vd", "vb", "callbacks");
+        }
     }
 
     int ov_clear(OggVorbis_File vf);

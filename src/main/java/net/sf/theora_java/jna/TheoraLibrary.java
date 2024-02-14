@@ -16,6 +16,8 @@
 
 package net.sf.theora_java.jna;
 
+import java.util.List;
+
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
@@ -97,6 +99,12 @@ public interface TheoraLibrary extends XiphLibrary {
         /** Pointer to start of Cr data */
         public Pointer /* unsigned char* */ v;
 
+        public yuv_buffer() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("y_width", "y_height", "y_stride", "uv_width", "uv_height", "uv_stride", "y", "u", "v");
+        }
     }
 
     /**
@@ -202,6 +210,17 @@ public interface TheoraLibrary extends XiphLibrary {
 
         public int /*theora_pixelformat*/ pixelformat;    /**< chroma subsampling mode to expect */
 
+        public theora_info() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("width", "height", "frame_width", "frame_height", "offset_x", "offset_y",
+                    "fps_numerator", "fps_denominator", "aspect_numerator", "aspect_denominator", "colorspace",
+                    "target_bitrate", "quality", "quick_p", "version_major", "version_minor", "version_subminor",
+                    "codec_setup", "dropframes_p", "keyframe_auto_p", "keyframe_frequency", "keyframe_frequency_force",
+                    "keyframe_data_target_bitrate", "keyframe_auto_threshold", "keyframe_mindistance",
+                    "noise_sensitivity", "sharpness", "pixelformat");
+        }
     }
 
     /**
@@ -215,6 +234,12 @@ public interface TheoraLibrary extends XiphLibrary {
         public Pointer /*void **/internal_encode;
         public Pointer /*void **/internal_decode;
 
+        public theora_state() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("i", "granulepos", "internal_encode", "internal_decode");
+        }
     }
 
     /**
@@ -247,6 +272,12 @@ public interface TheoraLibrary extends XiphLibrary {
         /** The vendor string identifying the encoder, null terminated */
         public Pointer /* char* */vendor;
 
+        public theora_comment() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("user_comments", "comment_lengths", "comments", "vendor");
+        }
     }
 
     int OC_FAULT = -1;

@@ -16,6 +16,8 @@
 
 package net.sf.theora_java.jna;
 
+import java.util.List;
+
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
@@ -48,6 +50,13 @@ public interface OggLibrary extends XiphLibrary {
         public Pointer /*unsigned char **/buffer;
         public Pointer /*unsigned char **/ptr;
         public NativeLong /*long*/ storage;
+
+        public oggpack_buffer() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("endbyte", "endbit", "buffer", "ptr", "storage");
+        }
     }
 
     /* ogg_page is used to encapsulate the data in one Ogg bitstream page *****/
@@ -58,6 +67,13 @@ public interface OggLibrary extends XiphLibrary {
         public NativeLong /*long*/ header_len;
         public Pointer /*unsigned char **/body;
         public NativeLong /*long*/ body_len;
+
+        public ogg_page() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("header", "header_len", "body", "body_len");
+        }
     }
 
 	/* ogg_stream_state contains the current encode/decode state of a logical
@@ -96,6 +112,13 @@ public interface OggLibrary extends XiphLibrary {
 	                             layer) also knows about the gap */
         public long /*ogg_int64_t*/   granulepos;
 
+        public ogg_stream_state() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("body_data", "body_storage", "body_fill", "body_returned", "lacing_vals",
+                    "granule_vals", "lacing_storage", "lacing_fill", "lacing_packet", "lacing_returned",
+                    "header", "header_fill", "e_o_s", "b_o_s", "serialno", "pageno", "packetno", "granulepos");
         }
     }
 
@@ -128,6 +151,13 @@ public interface OggLibrary extends XiphLibrary {
         public int unsynced;
         public int headerbytes;
         public int bodybytes;
+
+        public ogg_sync_state() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("data", "storage", "fill", "returned", "unsynced", "headerbytes", "bodybytes");
+        }
     }
 
     // Ogg BITSTREAM PRIMITIVES: bitstream

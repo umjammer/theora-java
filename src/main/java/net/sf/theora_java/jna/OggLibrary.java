@@ -1,3 +1,19 @@
+/********************************************************************
+ *                                                                  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
+ * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
+ * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
+ *                                                                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
+ *                                                                  *
+ ********************************************************************
+
+ function: toplevel libogg include
+ last mod: $Id: OggLibrary.java,v 1.1 2007/08/28 15:48:21 kenlars99 Exp $
+ ********************************************************************/
+
 package net.sf.theora_java.jna;
 
 import com.sun.jna.Native;
@@ -13,23 +29,8 @@ import com.sun.jna.Structure;
  */
 public interface OggLibrary extends XiphLibrary {
 
-    public static final OggLibrary INSTANCE = (OggLibrary) Native.loadLibrary("ogg", OggLibrary.class);
+    OggLibrary INSTANCE = Native.loadLibrary("ogg", OggLibrary.class);
 
-    /********************************************************************
-     *                                                                  *
-     * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
-     * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
-     * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
-     * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
-     *                                                                  *
-     * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
-     * by the Xiph.Org Foundation http://www.xiph.org/                  *
-     *                                                                  *
-     ********************************************************************
-
-     function: toplevel libogg include
-     last mod: $Id: OggLibrary.java,v 1.1 2007/08/28 15:48:21 kenlars99 Exp $
-     ********************************************************************/
 //	#ifndef _OGG_H
 //	#define _OGG_H
 //
@@ -39,7 +40,7 @@ public interface OggLibrary extends XiphLibrary {
 //
 //	#include <ogg/os_types.h>
 
-    public static class oggpack_buffer extends Structure {
+    class oggpack_buffer extends Structure {
 
         public NativeLong /*long*/ endbyte;
         public int endbit;
@@ -51,7 +52,7 @@ public interface OggLibrary extends XiphLibrary {
 
     /* ogg_page is used to encapsulate the data in one Ogg bitstream page *****/
 
-    public static class ogg_page extends Structure {
+    class ogg_page extends Structure {
 
         public Pointer /*unsigned char **/header;
         public NativeLong /*long*/ header_len;
@@ -62,7 +63,7 @@ public interface OggLibrary extends XiphLibrary {
 	/* ogg_stream_state contains the current encode/decode state of a logical
 	   Ogg bitstream **********************************************************/
 
-    public static class ogg_stream_state extends Structure {
+    class ogg_stream_state extends Structure {
 
         public Pointer /*unsigned char   **/ body_data;    /* bytes from packet bodies */
         public NativeLong /*long*/    body_storage;          /* storage elements allocated */
@@ -72,7 +73,7 @@ public interface OggLibrary extends XiphLibrary {
 
         public Pointer /*int     **/lacing_vals;      /* The values that will go to the segment table */
         public Pointer /*ogg_int64_t **/granule_vals; /* granulepos values for headers. Not compact
-					this way, but it is simple coupled to the
+					this way, but it is simply coupled to the
 					lacing fifo */
         public NativeLong /*long*/    lacing_storage;
         public NativeLong /*long*/    lacing_fill;
@@ -95,6 +96,7 @@ public interface OggLibrary extends XiphLibrary {
 	                             layer) also knows about the gap */
         public long /*ogg_int64_t*/   granulepos;
 
+        }
     }
 
 //	/* ogg_packet is used to encapsulate the data and metadata belonging
@@ -116,9 +118,9 @@ public interface OggLibrary extends XiphLibrary {
 //					layer) also knows about the gap */
 //	} 
 
-    public static class ogg_sync_state extends Structure {
+    class ogg_sync_state extends Structure {
 
-        public Pointer /*unsigned char **/data;
+        public Pointer /* unsigned char* */data;
         public int storage;
         public int fill;
         public int returned;
@@ -128,7 +130,7 @@ public interface OggLibrary extends XiphLibrary {
         public int bodybytes;
     }
 
-    /* Ogg BITSTREAM PRIMITIVES: bitstream ************************/
+    // Ogg BITSTREAM PRIMITIVES: bitstream
 
     void oggpack_writetrunc(oggpack_buffer b, NativeLong /*long*/ bits);
 

@@ -1,4 +1,4 @@
-package net.sf.theora_java.gui;
+package net.sf.theora_java;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -28,6 +28,7 @@ public class ImageFrame extends JFrame {
         imageFrame.setSize(300, 300);
         imageFrame.setLocation(200, 200);
         imageFrame.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 System.exit(0);
             }
@@ -86,6 +87,7 @@ public class ImageFrame extends JFrame {
                 this.newImage = newImage;
             }
 
+            @Override
             public void run() {
                 setImageInSwingThread(newImage);
             }
@@ -94,7 +96,7 @@ public class ImageFrame extends JFrame {
 
         private synchronized void setImageInSwingThread(Image image) {
             this.image = image;
-            final Dimension newSize = new Dimension(image.getWidth(null), image.getHeight(null));
+            Dimension newSize = new Dimension(image.getWidth(null), image.getHeight(null));
             setImageSize(newSize);
             repaint();
         }
@@ -104,11 +106,13 @@ public class ImageFrame extends JFrame {
             setSize(size);
         }
 
+        @Override
         public synchronized void paint(Graphics g) {
             if (image != null)
                 g.drawImage(image, 0, 0, this);
         }
 
+        @Override
         public synchronized Dimension getPreferredSize() {
             return size;
         }

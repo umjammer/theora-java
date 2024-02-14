@@ -15,20 +15,20 @@ public class Dumper {
 
     public static void dump(theora_info ti) {
         System.out.println("theora_info:");
-        System.out.println(" width=" + ti.width);        /**< encoded frame width  */
-        System.out.println(" height=" + ti.height);        /**< encoded frame height */
-        System.out.println(" frame_width=" + ti.frame_width);    /**< display frame width  */
-        System.out.println(" frame_height=" + ti.frame_height);    /**< display frame height */
-        System.out.println(" offset_x=" + ti.offset_x);    /**< horizontal offset of the displayed frame */
-        System.out.println(" offset_y=" + ti.offset_y);    /**< vertical offset of the displayed frame */
-        System.out.println(" fps_numerator=" + ti.fps_numerator);        /**< frame rate numerator **/
-        System.out.println(" fps_denominator=" + ti.fps_denominator);    /**< frame rate denominator **/
-        System.out.println(" aspect_numerator=" + ti.aspect_numerator);   /**< pixel aspect ratio numerator */
-        System.out.println(" aspect_denominator=" + ti.aspect_denominator); /**< pixel aspect ratio denominator */
-        System.out.println(" colorspace=" + ti.colorspace);        /**< colorspace */
-        System.out.println(" target_bitrate=" + ti.target_bitrate);        /**< nominal bitrate in bits per second */
-        System.out.println(" quality=" + ti.quality);  /**< Nominal quality setting, 0-63 */
-        System.out.println(" quick_p=" + ti.quick_p);  /**< Quick encode/decode */
+        System.out.println(" width=" + ti.width);        // encoded frame width 
+        System.out.println(" height=" + ti.height);        // encoded frame height
+        System.out.println(" frame_width=" + ti.frame_width);    // display frame width 
+        System.out.println(" frame_height=" + ti.frame_height);    // display frame height
+        System.out.println(" offset_x=" + ti.offset_x);    // horizontal offset of the displayed frame
+        System.out.println(" offset_y=" + ti.offset_y);    // vertical offset of the displayed frame
+        System.out.println(" fps_numerator=" + ti.fps_numerator);        // frame rate numerator
+        System.out.println(" fps_denominator=" + ti.fps_denominator);    // frame rate denominator
+        System.out.println(" aspect_numerator=" + ti.aspect_numerator);   // pixel aspect ratio numerator
+        System.out.println(" aspect_denominator=" + ti.aspect_denominator); // pixel aspect ratio denominator
+        System.out.println(" colorspace=" + ti.colorspace);        // colorspace
+        System.out.println(" target_bitrate=" + ti.target_bitrate);        // nominal bitrate in bits per second
+        System.out.println(" quality=" + ti.quality);  // Nominal quality setting, 0-63
+        System.out.println(" quick_p=" + ti.quick_p);  // Quick encode/decode
         System.out.println(" version_major=" + ti.version_major);
         System.out.println(" version_minor=" + ti.version_minor);
         System.out.println(" version_subminor=" + ti.version_subminor);
@@ -53,8 +53,8 @@ public class Dumper {
         System.out.println(" comments=" + tc.comments);
 
         if (tc.comments > 0) {
-            final Pointer[] user_comments = tc.user_comments.getPointerArray(0, tc.comments);
-            final int[] comment_lengths = tc.comment_lengths.getIntArray(0, tc.comments);
+            Pointer[] user_comments = tc.user_comments.getPointerArray(0, tc.comments);
+            int[] comment_lengths = tc.comment_lengths.getIntArray(0, tc.comments);
 
             for (int i = 0; i < tc.comments; ++i) {
                 System.out.println(" comment_lengths[" + i + "]=" + comment_lengths[i]);
@@ -66,8 +66,10 @@ public class Dumper {
     }
 
     private static String zeroPad(String s, int len) {
-        while (s.length() < len)
-            s = '0' + s;
+        StringBuilder sBuilder = new StringBuilder(s);
+        while (sBuilder.length() < len)
+            sBuilder.insert(0, '0');
+        s = sBuilder.toString();
         return s;
     }
 
@@ -76,8 +78,8 @@ public class Dumper {
     }
 
     public static void dump(XiphLibrary.ogg_packet op) {
-        final byte[] data = op.packet.getByteArray(0, op.bytes.intValue());
-        final int bytes = op.bytes.intValue();
+        byte[] data = op.packet.getByteArray(0, op.bytes.intValue());
+        int bytes = op.bytes.intValue();
         System.out.println("ogg_packet: ");
         System.out.println(" bytes=" + bytes);
         for (int i = 0; i < bytes; ++i) {

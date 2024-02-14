@@ -1,5 +1,6 @@
-package net.sf.theora_java.jna.example;
+package net.sf.theora_java;
 
+import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -13,11 +14,12 @@ import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import javax.swing.JWindow;
+import javax.swing.WindowConstants;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
-import net.sf.theora_java.gui.ImageFrame;
 import net.sf.theora_java.jna.OggLibrary;
 import net.sf.theora_java.jna.OggLibrary.ogg_page;
 import net.sf.theora_java.jna.OggLibrary.ogg_stream_state;
@@ -35,6 +37,7 @@ import net.sf.theora_java.jna.VorbisLibrary.vorbis_info;
 import net.sf.theora_java.jna.XiphLibrary.ogg_packet;
 import net.sf.theora_java.jna.utils.Dumper;
 import net.sf.theora_java.jna.utils.YUVConverter;
+import vavi.util.Debug;
 
 
 /**
@@ -59,7 +62,7 @@ public class PlayerExample {
 	   it's true. */
 
 
-    /*
+    /**
      * Helper; just grab some more compressed bitstream and sync it for page
      * extraction
      */
@@ -74,7 +77,7 @@ public class PlayerExample {
         return (bytes);
     }
 
-    /* Ogg and codec state for demux/decode */
+    // Ogg and codec state for demux/decode
     final ogg_sync_state oy = new ogg_sync_state();
     final ogg_page og = new ogg_page();
     ogg_stream_state vo = new ogg_stream_state();
@@ -93,16 +96,17 @@ public class PlayerExample {
 
     ImageFrame imageFrame;
 
-    /* single frame video buffering */
+    // single frame video buffering
     int videobuf_ready = 0;
-    long /*ogg_int64_t*/  videobuf_granulepos = -1;
+    long /* ogg_int64_t */  videobuf_granulepos = -1;
     double videobuf_time = 0;
 
-    /* single audio fragment audio buffering */
+    // single audio fragment audio buffering
     int audiobuf_fill = 0;
     int audiobuf_ready = 0;
     short[] audiobuf;
-    long /*ogg_int64_t*/  audiobuf_granulepos = 0; /* time position of last sample */
+    /** time position of last sample */
+    long /* ogg_int64_t */ audiobuf_granulepos = 0;
 
 //	/* audio / video synchronization tracking:
 //
@@ -152,20 +156,20 @@ public class PlayerExample {
         audiobuf = new short[audiofd_fragsize / 2]; // in bytes, so divide by 2
         // to get shorts
 
-        final Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
-        final float sampleRate = vi.rate.floatValue();
+        Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
+        float sampleRate = vi.rate.floatValue();
         final int sampleSizeInBits = 16;
-        final int channels = vi.channels;
-        final int frameSize = 2 * channels;
-        final float frameRate = sampleRate * channels;
+        int channels = vi.channels;
+        int frameSize = 2 * channels;
+        float frameRate = sampleRate * channels;
         final boolean bigEndian = false;
 
         try {
-            final AudioFormat audioFormat = new AudioFormat(encoding, sampleRate, sampleSizeInBits, channels, frameSize, frameRate, bigEndian);
-            System.out.println("JavaSound output format: " + audioFormat);
+            AudioFormat audioFormat = new AudioFormat(encoding, sampleRate, sampleSizeInBits, channels, frameSize, frameRate, bigEndian);
+            Debug.println("JavaSound output format: " + audioFormat);
             sourceLine = AudioSystem.getSourceDataLine(audioFormat);
             sourceLine.open(audioFormat);
-            // System.out.println("sourceLine.getBufferSize()=" +
+            // Debug.println("sourceLine.getBufferSize()=" +
             // sourceLine.getBufferSize()); // TODO: should we use this size for
             // audiofd_fragsize?
             sourceLine.start();
@@ -173,7 +177,6 @@ public class PlayerExample {
         } catch (LineUnavailableException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     //
@@ -185,7 +188,7 @@ public class PlayerExample {
 
         }
     }
-//
+
 // /* call this only immediately after unblocking from a full kernel
 //	   having a newly empty fragment or at the point of DMA restart */
 //	void audio_calibrate_timer(int restart){
@@ -221,7 +224,7 @@ public class PlayerExample {
 //	  if(audiofd_timer_calibrate==-1)audiofd_timer_calibrate=last=now;
 //
 //	  if(audiofd<0){
-//	    /* no audio timer to worry about, we can just use the system clock */
+//	    // no audio timer to worry about, we can just use the system clock
 //	    /* only one complication: If the process is suspended, we should
 //	       reset timing to account for the gap in play time.  Do it the
 //	       easy/hack way */
@@ -246,8 +249,7 @@ public class PlayerExample {
 //	}
 //
 
-
-    /*
+    /**
      * write a fragment to the OSS kernel audio API, but only if we can stuff in
      * a whole fragment without blocking
      */
@@ -257,7 +259,7 @@ public class PlayerExample {
 
             // convert from short array to byte array. TODO: inefficient, should
             // just store in byte array to begin with.
-            final byte[] data = new byte[audiobuf.length * 2];
+            byte[] data = new byte[audiobuf.length * 2];
             for (int i = 0; i < audiobuf.length; ++i) {
                 // little-endian:
                 data[i * 2] = (byte) (audiobuf[i] & 0xff);
@@ -311,46 +313,40 @@ public class PlayerExample {
         imageFrame.setImageSize(ti.frame_width, ti.frame_height);
         // TODO: imageFrame needs to size correctly, for now, hack it.
         imageFrame.setLocation(200, 200);
-        imageFrame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0); // TODO: shutdown properly
-            }
-        });
+        imageFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         imageFrame.setVisible(true);
-
     }
 
     void video_write() {
-        final yuv_buffer yuv = new yuv_buffer();
+        yuv_buffer yuv = new yuv_buffer();
 
         THEORA.theora_decode_YUVout(td, yuv);
 
-        final BufferedImage bi = YUVConverter.toBufferedImage(yuv, ti);
+        BufferedImage bi = YUVConverter.toBufferedImage(yuv, ti);
 
         imageFrame.setImage(bi);
-
     }
 
     /** dump the theora (or vorbis) comment header */
     int dump_comments(theora_comment tc) {
         int i, len;
-        final PrintStream out = System.out;
+        PrintStream out = System.out;
 
         out.printf("Encoded by %s\n", tc.vendor.getString(0));
         if (tc.comments > 0) {
             out.print("theora comment header:\n");
             for (i = 0; i < tc.comments; i++) {
-                final Pointer[] user_comments = tc.user_comments.getPointerArray(0, tc.comments);
-                final int[] comment_lengths = tc.comment_lengths.getIntArray(0, tc.comments);
+                Pointer[] user_comments = tc.user_comments.getPointerArray(0, tc.comments);
+                int[] comment_lengths = tc.comment_lengths.getIntArray(0, tc.comments);
 
                 if (user_comments[i] != null) {
                     len = comment_lengths[i];
-                    final String value = new String(user_comments[i].getByteArray(0, len));
+                    String value = new String(user_comments[i].getByteArray(0, len));
                     out.printf("\t%s\n", value);
                 }
             }
         }
-        return (0);
+        return 0;
     }
 
     /**
@@ -362,16 +358,16 @@ public class PlayerExample {
     void report_colorspace(theora_info ti) {
         switch (ti.colorspace) {
         case TheoraLibrary.OC_CS_UNSPECIFIED:
-            /* nothing to report */
+            // nothing to report
             break;
         case TheoraLibrary.OC_CS_ITU_REC_470M:
-            System.out.print("  encoder specified ITU Rec 470M (NTSC) color.\n");
+            Debug.print("  encoder specified ITU Rec 470M (NTSC) color.\n");
             break;
         case TheoraLibrary.OC_CS_ITU_REC_470BG:
-            System.out.print("  encoder specified ITU Rec 470BG (PAL) color.\n");
+            Debug.print("  encoder specified ITU Rec 470BG (PAL) color.\n");
             break;
         default:
-            System.out.printf("warning: encoder specified unknown colorspace (%d).\n", ti.colorspace);
+            Debug.printf("warning: encoder specified unknown colorspace (%d).\n", ti.colorspace);
             break;
         }
     }
@@ -400,8 +396,11 @@ public class PlayerExample {
     static final boolean ENABLE_AUDIO = true;
     static final boolean ENABLE_VIDEO = true;
     static final boolean DUMP = false; // used for testing only.
-    static final boolean USE_URL = true;    // input is a URL, not a file name.  Note: no buffering is done, so playback over the net can be choppy.
+    static final boolean USE_URL = true; // input is a URL, not a file name.  Note: no buffering is done, so playback over the net can be choppy.
 
+    /**
+     * @param args 0: url
+     */
     public static void main(String[] args) throws IOException {
         new PlayerExample().run(args);
     }
@@ -409,14 +408,14 @@ public class PlayerExample {
     public void run(String[] args) throws IOException {
 
         int i, j;
-        final ogg_packet op = new ogg_packet();
+        ogg_packet op = new ogg_packet();
 
-        final InputStream infile;
-        /* open the input file if any */
+        InputStream infile;
+        // open the input file if any
         if (args.length >= 1) {
 
             if (USE_URL) {
-                final URL url = new URL(args[0]);
+                URL url = new URL(args[0]);
                 infile = url.openStream();
 
             } else {
@@ -428,24 +427,24 @@ public class PlayerExample {
             return;
         }
 
-        System.out.println("Opened: " + args[0]);
+Debug.println("Opened: " + args[0]);
 
-        //System.out.println("Initializing...");
+Debug.println("Initializing...");
 
-        /* start up Ogg stream synchronization layer */
+        // start up Ogg stream synchronization layer
         OGG.ogg_sync_init(oy);
 
-        /* init supporting Vorbis structures needed in header parsing */
+        // init supporting Vorbis structures needed in header parsing
         VORBIS.vorbis_info_init(vi);
         VORBIS.vorbis_comment_init(vc);
 
-        /* init supporting Theora structures needed in header parsing */
+        // init supporting Theora structures needed in header parsing
         THEORA.theora_comment_init(tc);
         THEORA.theora_info_init(ti);
 
-        //System.out.println("Parsing headers...");
-        /* Ogg file open; parse the headers */
-        /* Only interested in Vorbis/Theora streams */
+        //Debug.println("Parsing headers...");
+        // Ogg file open; parse the headers
+        // Only interested in Vorbis/Theora streams
         while (stateflag == 0) {
             int ret = buffer_data(infile, oy);
             if (ret <= 0)
@@ -453,9 +452,9 @@ public class PlayerExample {
             while (OGG.ogg_sync_pageout(oy, og) > 0) {
                 ogg_stream_state test = new ogg_stream_state();
 
-                /* is this a mandated initial header? If not, stop parsing */
+                // is this a mandated initial header? If not, stop parsing
                 if (OGG.ogg_page_bos(og) == 0) {
-                    /* don't leak the page; get it into the appropriate stream */
+                    // don't leak the page; get it into the appropriate stream
                     queue_page(og);
                     stateflag = 1;
                     break;
@@ -467,9 +466,9 @@ public class PlayerExample {
                 if (DUMP)
                     Dumper.dump(op);
 
-                /* identify the codec: try theora */
+                // identify the codec: try theora
                 if (ENABLE_VIDEO && theora_p == 0 && THEORA.theora_decode_header(ti, tc, op) >= 0) {
-                    /* it is theora */
+                    // it is theora
                     to = test;
                     if (DUMP)
                         Dumper.dump(ti);
@@ -477,30 +476,30 @@ public class PlayerExample {
                         Dumper.dump(tc);
                     theora_p = 1;
                 } else if (ENABLE_AUDIO && vorbis_p == 0 && VORBIS.vorbis_synthesis_headerin(vi, vc, op) >= 0) {
-                    /* it is vorbis */
+                    // it is vorbis
                     vo = test;
                     //memcpy(&vo,&test,sizeof(test));
                     vorbis_p = 1;
                 } else {
-                    /* whatever it is, we don't care about it */
+                    // whatever it is, we don't care about it
                     OGG.ogg_stream_clear(test);
                 }
             }
-            /* fall through to non-bos page parsing */
+            // fall through to non-bos page parsing
         }
 
-        /* we're expecting more header packets. */
+        // we're expecting more header packets.
         while ((theora_p != 0 && theora_p < 3) || (vorbis_p != 0 && vorbis_p < 3)) {
             int ret;
 
-            /* look for further theora headers */
+            // look for further theora headers
             while (theora_p != 0 && (theora_p < 3) && ((ret = OGG.ogg_stream_packetout(to, op))) != 0) {
                 if (ret < 0) {
                     System.err.print("Error parsing Theora stream headers; corrupt stream?\n");
                     return;
                 }
                 if (THEORA.theora_decode_header(ti, tc, op) != 0) {
-                    System.err.printf("Error parsing Theora stream headers; corrupt stream?\n");
+                    System.err.print("Error parsing Theora stream headers; corrupt stream?\n");
                     return;
                 }
                 theora_p++;
@@ -508,7 +507,7 @@ public class PlayerExample {
                     break;
             }
 
-            /* look for more vorbis header packets */
+            // look for more vorbis header packets
             while (vorbis_p != 0 && (vorbis_p < 3) && ((ret = OGG.ogg_stream_packetout(vo, op))) != 0) {
                 if (ret < 0) {
                     System.err.print("Error parsing Vorbis stream headers; corrupt stream?\n");
@@ -524,13 +523,13 @@ public class PlayerExample {
                     break;
             }
 
-			/* The header pages/packets will arrive before anything else we
-			   care about, or the stream is not obeying spec */
+			// The header pages/packets will arrive before anything else we
+            // care about, or the stream is not obeying spec
 
             if (OGG.ogg_sync_pageout(oy, og) > 0) {
-                queue_page(og); /* demux into the appropriate stream */
+                queue_page(og); // demux into the appropriate stream
             } else {
-                final int ret2 = buffer_data(infile, oy); /* someone needs more data */
+                int ret2 = buffer_data(infile, oy); // someone needs more data
                 if (ret2 <= 0) {
                     System.err.print("End of file while searching for codec headers.\n");
                     return;
@@ -538,57 +537,57 @@ public class PlayerExample {
             }
         }
 
-        //System.out.println("Initializing decoders...");
+Debug.println("Initializing decoders...");
 
-        /* and now we have it all.  initialize decoders */
+        // and now we have it all.  initialize decoders
         if (theora_p != 0) {
             THEORA.theora_decode_init(td, ti);
-            System.out.printf("Ogg logical stream %x is Theora %dx%d %.02f fps", to.serialno.intValue(), ti.width, ti.height, (double) ti.fps_numerator / ti.fps_denominator);
+            Debug.printf("Ogg logical stream %x is Theora %dx%d %.02f fps", to.serialno.intValue(), ti.width, ti.height, (double) ti.fps_numerator / ti.fps_denominator);
             switch (ti.pixelformat) {
             case TheoraLibrary.OC_PF_420:
-                System.out.printf(" 4:2:0 video\n");
+                Debug.print(" 4:2:0 video\n");
                 break;
             case TheoraLibrary.OC_PF_422:
-                System.out.printf(" 4:2:2 video\n");
+                Debug.print(" 4:2:2 video\n");
                 break;
             case TheoraLibrary.OC_PF_444:
-                System.out.printf(" 4:4:4 video\n");
+                Debug.print(" 4:4:4 video\n");
                 break;
             case TheoraLibrary.OC_PF_RSVD:
             default:
-                System.out.printf(" video\n  (UNKNOWN Chroma sampling!)\n");
+                Debug.print(" video\n  (UNKNOWN Chroma sampling!)\n");
                 break;
             }
             if (ti.width != ti.frame_width || ti.height != ti.frame_height)
-                System.out.printf("  Frame content is %dx%d with offset (%d,%d).\n", ti.frame_width, ti.frame_height, ti.offset_x, ti.offset_y);
+                Debug.printf("  Frame content is %dx%d with offset (%d,%d).\n", ti.frame_width, ti.frame_height, ti.offset_x, ti.offset_y);
             report_colorspace(ti);
             dump_comments(tc);
         } else {
-            /* tear down the partial theora setup */
+            // tear down the partial theora setup
             THEORA.theora_info_clear(ti);
             THEORA.theora_comment_clear(tc);
         }
         if (vorbis_p != 0) {
             VORBIS.vorbis_synthesis_init(vd, vi);
             VORBIS.vorbis_block_init(vd, vb);
-            System.out.printf("Ogg logical stream %x is Vorbis %d channel %d Hz audio.\n", vo.serialno.intValue(), vi.channels, vi.rate.intValue());
+            Debug.printf("Ogg logical stream %x is Vorbis %d channel %d Hz audio.\n", vo.serialno.intValue(), vi.channels, vi.rate.intValue());
         } else {
-            /* tear down the partial vorbis setup */
+            // tear down the partial vorbis setup
             VORBIS.vorbis_info_clear(vi);
             VORBIS.vorbis_comment_clear(vc);
         }
 
-        //System.out.println("Starting playback...");
+        //Debug.println("Starting playback...");
 
-        /* open audio */
+        // open audio
         if (vorbis_p != 0)
             open_audio();
 
-        /* open video */
+        // open video
         if (theora_p != 0)
             open_video();
 
-        //	  /* install signal handler as SDL clobbered the default */
+        //	  // install signal handler as SDL clobbered the default
         //	  signal (SIGINT, sigint_handler);
 
 		/* on to the main decode loop.  We assume in this example that audio
@@ -597,7 +596,7 @@ public class PlayerExample {
 		   assumption in Ogg A/V streams! It will always be true of the
 		   example_encoder (and most streams) though. */
 
-        stateflag = 0; /* playback has not begun */
+        stateflag = 0; // playback has not begun
         while (true) {
 
 			/* we want a video and audio frame ready to go at all times.  If
@@ -605,21 +604,21 @@ public class PlayerExample {
 			   ogg do the buffering) */
             while (vorbis_p != 0 && audiobuf_ready == 0) {
                 int ret;
-                final PointerByReference pcm = new PointerByReference();
+                PointerByReference pcm = new PointerByReference();
 
-                /* if there's pending, decoded audio, grab it */
+                // if there's pending, decoded audio, grab it
                 if ((ret = VORBIS.vorbis_synthesis_pcmout(vd, pcm)) > 0) {
 
-                    final Pointer ppChannels = pcm.getValue();
-                    final Pointer[] pChannels = ppChannels.getPointerArray(0, vi.channels);
+                    Pointer ppChannels = pcm.getValue();
+                    Pointer[] pChannels = ppChannels.getPointerArray(0, vi.channels);
 
-                    final float[][] floatArrays = new float[pChannels.length][];
+                    float[][] floatArrays = new float[pChannels.length][];
                     for (int k = 0; k < pChannels.length; ++k) {
                         floatArrays[k] = pChannels[k].getFloatArray(0, ret);
                     }
 
                     int count = audiobuf_fill / 2;
-                    final int maxsamples = (audiofd_fragsize - audiobuf_fill) / 2 / vi.channels;
+                    int maxsamples = (audiofd_fragsize - audiobuf_fill) / 2 / vi.channels;
                     for (i = 0; i < ret && i < maxsamples; i++) {
                         for (j = 0; j < vi.channels; j++) {
 
@@ -643,18 +642,18 @@ public class PlayerExample {
 
                 } else {
 
-                    /* no pending audio; is there a pending packet to decode? */
+                    // no pending audio; is there a pending packet to decode?
                     if (OGG.ogg_stream_packetout(vo, op) > 0) {
-                        if (VORBIS.vorbis_synthesis(vb, op) == 0) /* test for success! */
+                        if (VORBIS.vorbis_synthesis(vb, op) == 0) // test for success!
                             VORBIS.vorbis_synthesis_blockin(vd, vb);
                     } else
-                        /* we need more data; break out to suck in another page */
+                        // we need more data; break out to suck in another page
                         break;
                 }
             }
 
             while (theora_p != 0 && videobuf_ready == 0) {
-                /* theora is one in, one out... */
+                // theora is one in, one out...
                 if (OGG.ogg_stream_packetout(to, op) > 0) {
 
                     THEORA.theora_decode_packetin(td, op);
@@ -678,7 +677,7 @@ public class PlayerExample {
             //	    if(videobuf_ready == 0 && audiobuf_ready == 0 && feof(infile))break;
 
             if (videobuf_ready == 0 || audiobuf_ready == 0) {
-                /* no data yet for somebody.  Grab another page */
+                // no data yet for somebody.  Grab another page
                 int bytes = buffer_data(infile, oy);
                 if (bytes < 0) {
                     // EOF.  Now we have to still process any buffered data, in particular in
@@ -697,11 +696,11 @@ public class PlayerExample {
                 }
             }
 
-            /* If playback has begun, top audio buffer off immediately. */
+            // If playback has begun, top audio buffer off immediately.
             if (stateflag != 0)
                 audio_write_nonblocking();
 
-            /* are we at or past time for this video frame? */
+            // are we at or past time for this video frame?
             if (stateflag != 0 && videobuf_ready != 0
                 //		&& videobuf_time<=get_time()
             ) {
@@ -717,7 +716,7 @@ public class PlayerExample {
             //	         full), it's not time to play video, so wait until one of the
             //	         audio buffer is ready or it's near time to play video */
             //
-            //	      /* set up select wait on the audiobuffer and a timeout for video */
+            //	      // set up select wait on the audiobuffer and a timeout for video
             //	      struct timeval timeout;
             //	      fd_set writefs;
             //	      fd_set empty;
@@ -749,12 +748,12 @@ public class PlayerExample {
 			   we can begin playback */
             if ((theora_p == 0 || videobuf_ready != 0) && (vorbis_p == 0 || audiobuf_ready != 0))
                 stateflag = 1;
-            //	    /* same if we've run out of input */
+            //	    // same if we've run out of input
             //	    if(feof(infile))stateflag=1;
 
         }
 
-        /* tear it all down */
+        // tear it all down
 
         // play any remaining buffered audio:
         if (sourceLine != null)
@@ -780,10 +779,6 @@ public class PlayerExample {
 
         infile.close();
 
-        System.out.println();
-        System.out.println("Done.");
-
+        Debug.println("Done.");
     }
-
-
 }

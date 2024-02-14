@@ -1,3 +1,19 @@
+/********************************************************************
+ *                                                                  *
+ * THIS FILE IS PART OF THE OggTheora SOFTWARE CODEC SOURCE CODE.   *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
+ * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
+ * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
+ *                                                                  *
+ * THE Theora SOURCE CODE IS COPYRIGHT (C) 2002-2003                *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
+ *                                                                  *
+ ********************************************************************
+
+ function:
+ last mod: $Id: TheoraLibrary.java,v 1.1 2007/08/28 15:48:21 kenlars99 Exp $
+ ********************************************************************/
+
 package net.sf.theora_java.jna;
 
 import com.sun.jna.Native;
@@ -12,23 +28,7 @@ import com.sun.jna.Structure;
  */
 public interface TheoraLibrary extends XiphLibrary {
 
-    public static final TheoraLibrary INSTANCE = (TheoraLibrary) Native.loadLibrary("theora", TheoraLibrary.class);
-
-    /********************************************************************
-     *                                                                  *
-     * THIS FILE IS PART OF THE OggTheora SOFTWARE CODEC SOURCE CODE.   *
-     * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
-     * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
-     * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
-     *                                                                  *
-     * THE Theora SOURCE CODE IS COPYRIGHT (C) 2002-2003                *
-     * by the Xiph.Org Foundation http://www.xiph.org/                  *
-     *                                                                  *
-     ********************************************************************
-
-     function:
-     last mod: $Id: TheoraLibrary.java,v 1.1 2007/08/28 15:48:21 kenlars99 Exp $
-     ********************************************************************/
+    TheoraLibrary INSTANCE = Native.loadLibrary("theora", TheoraLibrary.class);
 
 //	#ifndef _O_THEORA_H_
 //	#define _O_THEORA_H_
@@ -75,26 +75,27 @@ public interface TheoraLibrary extends XiphLibrary {
      * row from the top of the frame to the bottom. Within each row samples
      * are ordered from left to right.
      */
-    public static class yuv_buffer extends Structure {
+    class yuv_buffer extends Structure {
 
+        /** Width of the Y' luminance plane */
         public int y_width;
-        /** < Width of the Y' luminance plane */
+        /** Height of the luminance plane */
         public int y_height;
-        /** < Height of the luminance plane */
+        /** Offset in bytes between successive rows */
         public int y_stride;
-        /** < Offset in bytes between successive rows */
 
+        /** Height of the Cb and Cr chroma planes */
         public int uv_width;
-        /** < Height of the Cb and Cr chroma planes */
+        /** Width of the chroma planes */
         public int uv_height;
-        /** < Width of the chroma planes */
+        /** Offset between successive chroma rows */
         public int uv_stride;
-        /** < Offset between successive chroma rows */
-        public Pointer /* unsigned char * */y;
-        /** < Pointer to start of luminance data */
-        public Pointer /* unsigned char * */u;
-        /** < Pointer to start of Cb data */
-        public Pointer /* unsigned char * */v;   /**< Pointer to start of Cr data */
+        /** Pointer to start of luminance data */
+        public Pointer /* unsigned char* */ y;
+        /** Pointer to start of Cb data */
+        public Pointer /* unsigned char* */ u;
+        /** Pointer to start of Cr data */
+        public Pointer /* unsigned char* */ v;
 
     }
 
@@ -102,13 +103,13 @@ public interface TheoraLibrary extends XiphLibrary {
      * A Colorspace.
      */
 //	typedef enum {
-    public static final int OC_CS_UNSPECIFIED = 0;
+    int OC_CS_UNSPECIFIED = 0;
     /** < The colorspace is unknown or unspecified */
-    public static final int OC_CS_ITU_REC_470M = 1;
+    int OC_CS_ITU_REC_470M = 1;
     /** < This is the best option for 'NTSC' content */
-    public static final int OC_CS_ITU_REC_470BG = 2;
+    int OC_CS_ITU_REC_470BG = 2;
     /** < This is the best option for 'PAL' content */
-    public static final int OC_CS_NSPACES = 3;         /**< This marks the end of the defined colorspaces */
+    int OC_CS_NSPACES = 3;         /**< This marks the end of the defined colorspaces */
 //	} theora_colorspace;
 
     /**
@@ -119,13 +120,13 @@ public interface TheoraLibrary extends XiphLibrary {
      * exact definitions.
      */
 //	typedef enum {
-    public static final int OC_PF_420 = 0;
+    int OC_PF_420 = 0;
     /** < Chroma subsampling by 2 in each direction (4:2:0) */
-    public static final int OC_PF_RSVD = 1;
+    int OC_PF_RSVD = 1;
     /** < Reserved value */
-    public static final int OC_PF_422 = 2;
+    int OC_PF_422 = 2;
     /** < Horizonatal chroma subsampling by 2 (4:2:2) */
-    public static final int OC_PF_444 = 3;    /**< No chroma subsampling at all (4:4:4) */
+    int OC_PF_444 = 3;    /**< No chroma subsampling at all (4:4:4) */
 //	} theora_pixelformat;
 
     /**
@@ -149,7 +150,7 @@ public interface TheoraLibrary extends XiphLibrary {
      * see the example code for use of the other parameters and
      * good default settings for the encoder parameters.
      */
-    public static class theora_info extends Structure {
+    class theora_info extends Structure {
 
         public int /*ogg_uint32_t*/  width;
         /** < encoded frame width */
@@ -206,7 +207,7 @@ public interface TheoraLibrary extends XiphLibrary {
     /**
      * Codec internal state and context.
      */
-    public static class theora_state extends Structure {
+    class theora_state extends Structure {
 
         public theora_info i;
         public long /*ogg_int64_t*/ granulepos;
@@ -235,37 +236,38 @@ public interface TheoraLibrary extends XiphLibrary {
      * and so the length array should be treated as authoritative
      * for their length.
      */
-    public static class theora_comment extends Structure {
+    class theora_comment extends Structure {
 
-        public Pointer /*char ***/user_comments;
-        /** < An array of comment string vectors */
-        public Pointer /*int   **/comment_lengths;
-        /** < An array of corresponding string vector lengths in bytes */
+        /** An array of comment string vectors */
+        public Pointer /* char** */user_comments;
+        /** An array of corresponding string vector lengths in bytes */
+        public Pointer /* int* */comment_lengths;
+        /** The total number of comment string vectors */
         public int comments;
-        /** < The total number of comment string vectors */
-        public Pointer /*char  **/vendor;                /**< The vendor string identifying the encoder, null terminated */
+        /** The vendor string identifying the encoder, null terminated */
+        public Pointer /* char* */vendor;
 
     }
 
-    public static final int OC_FAULT = -1;
+    int OC_FAULT = -1;
     /** < General failure */
-    public static final int OC_EINVAL = -10;
+    int OC_EINVAL = -10;
     /** < Library encountered invalid internal data */
-    public static final int OC_DISABLED = -11;
+    int OC_DISABLED = -11;
     /** < Requested action is disabled */
-    public static final int OC_BADHEADER = -20;
+    int OC_BADHEADER = -20;
     /** < Header packet was corrupt/invalid */
-    public static final int OC_NOTFORMAT = -21;
+    int OC_NOTFORMAT = -21;
     /** < Packet is not a theora packet */
-    public static final int OC_VERSION = -22;
+    int OC_VERSION = -22;
     /** < Bitstream version is not handled */
-    public static final int OC_IMPL = -23;
+    int OC_IMPL = -23;
     /** < Feature or action not implemented */
-    public static final int OC_BADPACKET = -24;
+    int OC_BADPACKET = -24;
     /** < Packet is corrupt */
-    public static final int OC_NEWPACKET = -25;
+    int OC_NEWPACKET = -25;
     /** < Packet is an (ignorable) unhandled extension */
-    public static final int OC_DUPFRAME = 1;        /**< Packet is a dropped frame */
+    int OC_DUPFRAME = 1;        /**< Packet is a dropped frame */
 
     /**
      * Retrieve a human-readable string to identify the encoder vendor and version.

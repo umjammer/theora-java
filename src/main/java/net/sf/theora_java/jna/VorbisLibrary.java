@@ -1,3 +1,16 @@
+/*
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS
+ * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE
+ * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.
+ *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001
+ * by the XIPHOPHORUS Company http://www.xiph.org/
+ *
+ * function: libvorbis codec headers
+ * last mod: $Id: VorbisLibrary.java,v 1.1 2007/08/28 15:48:21 kenlars99 Exp $
+ */
+
 package net.sf.theora_java.jna;
 
 import com.sun.jna.Native;
@@ -17,25 +30,10 @@ import net.sf.theora_java.jna.OggLibrary.oggpack_buffer;
  */
 public interface VorbisLibrary extends XiphLibrary {
 
-    public static final VorbisLibrary INSTANCE = (VorbisLibrary) Native.loadLibrary("vorbis", VorbisLibrary.class);
-
+    VorbisLibrary INSTANCE = Native.load("vorbis", VorbisLibrary.class);
 
     // codec.h:
 
-    /********************************************************************
-     *                                                                  *
-     * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
-     * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
-     * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
-     * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
-     *                                                                  *
-     * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
-     * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-     ********************************************************************
-
-     function: libvorbis codec headers
-     last mod: $Id: VorbisLibrary.java,v 1.1 2007/08/28 15:48:21 kenlars99 Exp $
-     ********************************************************************/
 
 //    #ifndef _vorbis_codec_h_
 //    #define _vorbis_codec_h_
@@ -47,7 +45,7 @@ public interface VorbisLibrary extends XiphLibrary {
 //
 //    #include <ogg/ogg.h>
 
-    public static class vorbis_info extends Structure {
+    class vorbis_info extends Structure {
 
         public int version;
         public int channels;
@@ -68,24 +66,34 @@ public interface VorbisLibrary extends XiphLibrary {
            the coder does not care to speculate.
       */
 
-        public NativeLong /*long*/ bitrate_upper;
-        public NativeLong /*long*/ bitrate_nominal;
-        public NativeLong /*long*/ bitrate_lower;
-        public NativeLong /*long*/ bitrate_window;
+        public NativeLong /* long */ bitrate_upper;
+        public NativeLong /* long */ bitrate_nominal;
+        public NativeLong /* long */ bitrate_lower;
+        public NativeLong /* long */ bitrate_window;
 
         public Pointer /*void**/ codec_setup;
+
+        public vorbis_info() {}
+
+        @Override
+        protected List<String> getFieldOrder() {
+            return List.of("version", "channels", "rate", "bitrate_upper", "bitrate_nominal", "bitrate_lower",
+                    "bitrate_window", "codec_setup");
+        }
     }
 
-    /* vorbis_dsp_state buffers the current vorbis audio
-       analysis/synthesis state.  The DSP state belongs to a specific
-       logical bitstream ****************************************************/
-    public static class vorbis_dsp_state extends Structure {
+    /**
+     * vorbis_dsp_state buffers the current vorbis audio
+     * analysis/synthesis state.  The DSP state belongs to a specific
+     * logical bitstream
+     */
+    class vorbis_dsp_state extends Structure {
 
         public int analysisp;
-        public Pointer /*vorbis_info **/ vi;
+        public Pointer /* vorbis_info* */ vi;
 
-        public Pointer /*float***/ pcm;
-        public Pointer /*float***/ pcmret;
+        public Pointer /* float** */ pcm;
+        public Pointer /* float** */ pcmret;
         public int pcm_storage;
         public int pcm_current;
         public int pcm_returned;
@@ -93,31 +101,32 @@ public interface VorbisLibrary extends XiphLibrary {
         public int preextrapolate;
         public int eofflag;
 
+        public NativeLong /* long */ lW;
+        public NativeLong /* long */ W;
+        public NativeLong /* long */ nW;
+        public NativeLong /* long */ centerW;
+
+        public long /* ogg_int64_t */ granulepos;
+        public long /* ogg_int64_t */ sequence;
+
+        public long /* ogg_int64_t */ glue_bits;
+        public long /* ogg_int64_t */ time_bits;
+        public long /* ogg_int64_t */ floor_bits;
+        public long /* ogg_int64_t */ res_bits;
+
+        public Pointer /* void* */ backend_state;
+    }
+
+    /** necessary stream state for linking to the framing abstraction */
+    class vorbis_block extends Structure {
+
+        /** this is a pointer into local storage */
+        public Pointer /* float** */ pcm;
+        public oggpack_buffer opb;
+
         public NativeLong /*long*/ lW;
         public NativeLong /*long*/ W;
         public NativeLong /*long*/ nW;
-        public NativeLong /*long*/ centerW;
-
-        public long /*ogg_int64_t*/ granulepos;
-        public long /*ogg_int64_t*/ sequence;
-
-        public long /*ogg_int64_t*/ glue_bits;
-        public long /*ogg_int64_t*/ time_bits;
-        public long /*ogg_int64_t*/ floor_bits;
-        public long /*ogg_int64_t*/ res_bits;
-
-        public Pointer /*void       **/backend_state;
-    }
-
-    public static class vorbis_block extends Structure {
-
-        /* necessary stream state for linking to the framing abstraction */
-        public Pointer /*float  ***/ pcm;       /* this is a pointer into local storage */
-        public oggpack_buffer opb;
-
-        public NativeLong /*long*/  lW;
-        public NativeLong /*long*/  W;
-        public NativeLong /*long*/  nW;
         public int pcmend;
         public int mode;
 
@@ -142,28 +151,32 @@ public interface VorbisLibrary extends XiphLibrary {
 
         public Pointer /*void**/ internal;
 
+
     }
 
-    /* vorbis_block is a single block of data to be processed as part of
-    the analysis/synthesis stream; it belongs to a specific logical
-    bitstream, but is independant from other vorbis_blocks belonging to
-    that logical bitstream. *************************************************/
-
-    public static class alloc_chain extends Structure {
+    /**
+     * vorbis_block is a single block of data to be processed as part of
+     * the analysis/synthesis stream; it belongs to a specific logical
+     * bitstream, but is independant from other vorbis_blocks belonging to
+     * that logical bitstream.
+     */
+    class alloc_chain extends Structure {
 
         public Pointer /*void**/ ptr;
         public Pointer /*struct alloc_chain **/ next;
+
     }
 
-    /* vorbis_info contains all the setup information specific to the
-       specific compression/decompression mode in progress (eg,
-       psychoacoustic settings, channel setup, options, codebook
-       etc). vorbis_info and substructures are in backends.h.
-    *********************************************************************/
-
-    /* the comments are not part of vorbis_info so that vorbis_info can be
-       static storage */
-    public static class vorbis_comment extends Structure {
+    /**
+     * vorbis_info contains all the setup information specific to the
+     * specific compression/decompression mode in progress (eg,
+     * psychoacoustic settings, channel setup, options, codebook
+     * etc). vorbis_info and substructures are in backends.h.
+     * <p>
+     * the comments are not part of vorbis_info so that vorbis_info can be
+     * static storage
+     */
+    class vorbis_comment extends Structure {
 
         /* unlimited user comment fields.  libvorbis writes 'libvorbis'
            whatever vendor is set to in encode */
@@ -172,9 +185,9 @@ public interface VorbisLibrary extends XiphLibrary {
         public int comments;
         public Pointer /*char  **/ vendor;
 
-    } 
+    }
 
-    /* libvorbis encodes in two abstraction layers; first we perform DSP
+    /** libvorbis encodes in two abstraction layers; first we perform DSP
        and produce a packet (see docs/analysis.txt).  The packet is then
        coded into a framed OggSquish bitstream by the second layer (see
        docs/framing.txt).  Decode is the reverse process; we sync/frame
@@ -184,9 +197,9 @@ public interface VorbisLibrary extends XiphLibrary {
        The extra framing/packetizing is used in streaming formats, such as
        files.  Over the net (such as with UDP), the framing and
        packetization aren't necessary as they're provided by the transport
-       and the streaming layer is not used */
+       and the streaming layer is not used
 
-    /* Vorbis PRIMITIVES: general ***************************************/
+    * Vorbis PRIMITIVES: general */
 
     void vorbis_info_init(vorbis_info vi);
 
@@ -269,21 +282,21 @@ public interface VorbisLibrary extends XiphLibrary {
 
     /* Vorbis ERRORS and return codes ***********************************/
 
-    public static final int OV_FALSE = -1;
-    public static final int OV_EOF = -2;
-    public static final int OV_HOLE = -3;
+    int OV_FALSE = -1;
+    int OV_EOF = -2;
+    int OV_HOLE = -3;
 
-    public static final int OV_EREAD = -128;
-    public static final int OV_EFAULT = -129;
-    public static final int OV_EIMPL = -130;
-    public static final int OV_EINVAL = -131;
-    public static final int OV_ENOTVORBIS = -132;
-    public static final int OV_EBADHEADER = -133;
-    public static final int OV_EVERSION = -134;
-    public static final int OV_ENOTAUDIO = -135;
-    public static final int OV_EBADPACKET = -136;
-    public static final int OV_EBADLINK = -137;
-    public static final int OV_ENOSEEK = -138;
+    int OV_EREAD = -128;
+    int OV_EFAULT = -129;
+    int OV_EIMPL = -130;
+    int OV_EINVAL = -131;
+    int OV_ENOTVORBIS = -132;
+    int OV_EBADHEADER = -133;
+    int OV_EVERSION = -134;
+    int OV_ENOTAUDIO = -135;
+    int OV_EBADPACKET = -136;
+    int OV_EBADLINK = -137;
+    int OV_ENOSEEK = -138;
 
 //    #ifdef __cplusplus
 //    }
@@ -355,12 +368,12 @@ public interface VorbisLibrary extends XiphLibrary {
     int vorbis_encode_ctl(vorbis_info vi, int number, Pointer /*void**/ arg);
 
     /* deprecated rate management supported only for compatability */
-    public static final int OV_ECTL_RATEMANAGE_GET = 0x10;
-    public static final int OV_ECTL_RATEMANAGE_SET = 0x11;
-    public static final int OV_ECTL_RATEMANAGE_AVG = 0x12;
-    public static final int OV_ECTL_RATEMANAGE_HARD = 0x13;
+    int OV_ECTL_RATEMANAGE_GET = 0x10;
+    int OV_ECTL_RATEMANAGE_SET = 0x11;
+    int OV_ECTL_RATEMANAGE_AVG = 0x12;
+    int OV_ECTL_RATEMANAGE_HARD = 0x13;
 
-    public static class ovectl_ratemanage_arg extends Structure {
+    class ovectl_ratemanage_arg extends Structure {
 
         public int management_active;
 
@@ -372,14 +385,14 @@ public interface VorbisLibrary extends XiphLibrary {
         public NativeLong /*long*/   bitrate_av_hi;
         public double bitrate_av_window;
         public double bitrate_av_window_center;
+
     }
 
-
     /* new rate setup */
-    public static final int OV_ECTL_RATEMANAGE2_GET = 0x14;
-    public static final int OV_ECTL_RATEMANAGE2_SET = 0x15;
+    int OV_ECTL_RATEMANAGE2_GET = 0x14;
+    int OV_ECTL_RATEMANAGE2_SET = 0x15;
 
-    public static class ovectl_ratemanage2_arg extends Structure {
+    class ovectl_ratemanage2_arg extends Structure {
 
         public int management_active;
 
@@ -393,11 +406,11 @@ public interface VorbisLibrary extends XiphLibrary {
     }
 
 
-    public static final int OV_ECTL_LOWPASS_GET = 0x20;
-    public static final int OV_ECTL_LOWPASS_SET = 0x21;
+    int OV_ECTL_LOWPASS_GET = 0x20;
+    int OV_ECTL_LOWPASS_SET = 0x21;
 
-    public static final int OV_ECTL_IBLOCK_GET = 0x30;
-    public static final int OV_ECTL_IBLOCK_SET = 0x31;
+    int OV_ECTL_IBLOCK_GET = 0x30;
+    int OV_ECTL_IBLOCK_SET = 0x31;
 
 //    #ifdef __cplusplus
 //    }
@@ -445,7 +458,7 @@ public interface VorbisLibrary extends XiphLibrary {
      * the right values. For seek_func(), you *MUST* return -1 if the stream is
      * unseekable
      */
-    public static class ov_callbacks extends Structure {
+    class ov_callbacks extends Structure {
 
         // TODO: use JNA callbacks:
         public Pointer read_func;//size_t (*read_func)  (void *ptr, size_t size, size_t nmemb, void *datasource);
@@ -454,15 +467,16 @@ public interface VorbisLibrary extends XiphLibrary {
         public Pointer tell_func;//long   (*tell_func)  (void *datasource);
     }
 
-    public static final int NOTOPEN = 0;
-    public static final int PARTOPEN = 1;
-    public static final int OPENED = 2;
-    public static final int STREAMSET = 3;
-    public static final int INITSET = 4;
+    int NOTOPEN = 0;
+    int PARTOPEN = 1;
+    int OPENED = 2;
+    int STREAMSET = 3;
+    int INITSET = 4;
 
-    public static class OggVorbis_File extends Structure {
+    class OggVorbis_File extends Structure {
 
-        public Pointer /*void            **/datasource; /* Pointer to a FILE *, etc. */
+        /** Pointer to a FILE *, etc. */
+        public Pointer /* void* */ datasource;
         public int seekable;
         public long /*ogg_int64_t*/      offset;
         public long /*ogg_int64_t*/      end;

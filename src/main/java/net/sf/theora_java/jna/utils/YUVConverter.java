@@ -17,12 +17,12 @@ public class YUVConverter {
 
     public static BufferedImage toBufferedImage(yuv_buffer yuv, theora_info ti) {
 
-        final int sizeX = ti.width;
-        final int sizeY = ti.height;
+        int sizeX = ti.width;
+        int sizeY = ti.height;
 
-        final Pointer srcY = yuv.y;
-        final Pointer srcU = yuv.u;
-        final Pointer srcV = yuv.v;
+        Pointer srcY = yuv.y;
+        Pointer srcU = yuv.u;
+        Pointer srcV = yuv.v;
 
 //		check( YUVBuffer.y_width  == YUVBuffer.uv_width  * 2 );
 //		check( YUVBuffer.y_height == YUVBuffer.uv_height * 2 );
@@ -41,28 +41,28 @@ public class YUVConverter {
 //			throw new RuntimeException("TODO: TheoraInfo.offset_y != 0");
 
 
-        final BufferedImage bi = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
-        final int[] pixels = new int[sizeX * sizeY];
+        BufferedImage bi = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
+        int[] pixels = new int[sizeX * sizeY];
 
         {
             int pixelIndex = 0;
 
             for (int y = 0; y < sizeY; y++) {
                 for (int x = 0; x < sizeX / 2; x++) {
-                    final int OffsetY0 = yuv.y_stride * y + x * 2;
-                    final int OffsetY1 = yuv.y_stride * y + x * 2 + 1;
-                    final int OffsetUV = yuv.uv_stride * (y / 2) + x;
+                    int OffsetY0 = yuv.y_stride * y + x * 2;
+                    int OffsetY1 = yuv.y_stride * y + x * 2 + 1;
+                    int OffsetUV = yuv.uv_stride * (y / 2) + x;
 
                     // TODO: convert these to ints?  unsigned problems?
-                    final int Y0 = srcY.getByte(OffsetY0) & 0xff;
-                    final int Y1 = srcY.getByte(OffsetY1) & 0xff;
-                    final int U = srcU.getByte(OffsetUV) & 0xff;
-                    final int V = srcV.getByte(OffsetUV) & 0xff;
+                    int Y0 = srcY.getByte(OffsetY0) & 0xff;
+                    int Y1 = srcY.getByte(OffsetY1) & 0xff;
+                    int U = srcU.getByte(OffsetUV) & 0xff;
+                    int V = srcV.getByte(OffsetUV) & 0xff;
 
                     {
-                        final byte r = clamp(appTrunc(Y0 + 1.402f * (V - 128)), 0, 255);
-                        final byte g = clamp(appTrunc(Y0 - 0.34414f * (U - 128) - 0.71414f * (V - 128)), 0, 255);
-                        final byte b = clamp(appTrunc(Y0 + 1.772f * (U - 128)), 0, 255);
+                        byte r = clamp(appTrunc(Y0 + 1.402f * (V - 128)), 0, 255);
+                        byte g = clamp(appTrunc(Y0 - 0.34414f * (U - 128) - 0.71414f * (V - 128)), 0, 255);
+                        byte b = clamp(appTrunc(Y0 + 1.772f * (U - 128)), 0, 255);
 
                         int pixel = 0;
                         pixel += r & 0xff;    // red
@@ -74,9 +74,9 @@ public class YUVConverter {
                     }
 
                     {
-                        final byte r = clamp(appTrunc(Y1 + 1.402f * (V - 128)), 0, 255);
-                        final byte g = clamp(appTrunc(Y1 - 0.34414f * (U - 128) - 0.71414f * (V - 128)), 0, 255);
-                        final byte b = clamp(appTrunc(Y1 + 1.772f * (U - 128)), 0, 255);
+                        byte r = clamp(appTrunc(Y1 + 1.402f * (V - 128)), 0, 255);
+                        byte g = clamp(appTrunc(Y1 - 0.34414f * (U - 128) - 0.71414f * (V - 128)), 0, 255);
+                        byte b = clamp(appTrunc(Y1 + 1.772f * (U - 128)), 0, 255);
 
                         int pixel = 0;
                         pixel += r & 0xff;    // red
@@ -88,7 +88,6 @@ public class YUVConverter {
                     }
                 }
             }
-
         }
 
         bi.setRGB(0, 0, sizeX, sizeY, pixels, 0, sizeX);
@@ -107,5 +106,4 @@ public class YUVConverter {
         else
             return (byte) x;
     }
-
 }

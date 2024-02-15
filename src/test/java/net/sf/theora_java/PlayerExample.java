@@ -145,7 +145,7 @@ public class PlayerExample {
 	                                       accurate immediately after a bank
 	                                       switch */
 //	int          audiofd=-1;
-//	long /*ogg_int64_t*/  audiofd_timer_calibrate=-1;
+//	long /* ogg_int64_t */  audiofd_timer_calibrate=-1;
 //
 
     private SourceDataLine sourceLine;
@@ -193,8 +193,8 @@ public class PlayerExample {
 //	   having a newly empty fragment or at the point of DMA restart */
 //	void audio_calibrate_timer(int restart){
 //	  struct timeval tv;
-//	  long /*ogg_int64_t*/ current_sample;
-//	  long /*ogg_int64_t*/ new_time;
+//	  long /* ogg_int64_t */ current_sample;
+//	  long /* ogg_int64_t */ new_time;
 //
 //	  gettimeofday(&tv,0);
 //	  new_time=tv.tv_sec*1000+tv.tv_usec/1000;
@@ -213,9 +213,9 @@ public class PlayerExample {
 //	/* get relative time since beginning playback, compensating for A/V
 //	   drift */
 //	double get_time(){
-//	  static long /*ogg_int64_t*/ last=0;
-//	  static long /*ogg_int64_t*/ up=0;
-//	  long /*ogg_int64_t*/ now;
+//	  static long /* ogg_int64_t */ last=0;
+//	  static long /* ogg_int64_t */ up=0;
+//	  long /* ogg_int64_t */ now;
 //	  struct timeval tv;
 //
 //	  gettimeofday(&tv,0);

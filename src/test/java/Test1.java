@@ -6,7 +6,6 @@
 
 import java.util.Arrays;
 
-import com.sun.jna.Structure;
 import net.sf.theora_java.jna.OggLibrary.ogg_page;
 import net.sf.theora_java.jna.OggLibrary.ogg_stream_state;
 import net.sf.theora_java.jna.OggLibrary.ogg_sync_state;

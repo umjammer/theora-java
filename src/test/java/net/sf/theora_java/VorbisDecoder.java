@@ -30,13 +30,14 @@ import net.sf.theora_java.jna.VorbisLibrary.vorbis_info;
 import net.sf.theora_java.jna.XiphLibrary.ogg_packet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import vavi.sound.SoundUtil;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import vavi.util.Debug;
 import vavi.util.properties.annotation.Property;
 import vavi.util.properties.annotation.PropsEntity;
 import vavix.util.Checksum;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static vavi.sound.SoundUtil.volume;
 
 
 /*
@@ -54,8 +55,8 @@ public class VorbisDecoder {
     @Property(name = "ogg")
     String ogg = "src/test/resources/test.ogg";
 
-    @Property(name = "wav")
-    String wav = "src/test/resources/test.wav";
+    @Property(name = "pcm")
+    String pcm = "src/test/resources/test.pcm";
 
     @Property(name = "play.ogg")
     String playOgg = "src/test/resources/test.ogg";
@@ -69,21 +70,22 @@ public class VorbisDecoder {
 
     @Test
     void test1() throws Exception {
-        Path out = Path.of("tmp", "out.wav");
+        Path out = Path.of("tmp", "out.pcm");
         if (!Files.exists(out.getParent())) {
             Files.createDirectories(out.getParent());
         }
 
         decode(Path.of(ogg), out);
 
-Debug.println(Checksum.getChecksum(out) + ", " + Checksum.getChecksum(Paths.get(wav)));
-        assertEquals(Checksum.getChecksum(out), Checksum.getChecksum(Paths.get(wav)));
+Debug.println(Checksum.getChecksum(out) + ", " + Checksum.getChecksum(Paths.get(pcm)));
+        assertEquals(Checksum.getChecksum(out), Checksum.getChecksum(Paths.get(pcm)));
     }
 
     // TODO noise at first
     @Test
+    @EnabledIfSystemProperty(named = "vavi.test", matches = "ide")
     void test2() throws Exception {
-        Path out = Path.of("tmp", "out2.wav");
+        Path out = Path.of("tmp", "out2.pcm");
         if (!Files.exists(out.getParent())) {
             Files.createDirectories(out.getParent());
         }
@@ -106,7 +108,7 @@ Debug.println(Checksum.getChecksum(out) + ", " + Checksum.getChecksum(Paths.get(
 
         byte[] buf = new byte[8192];
         line.open(audioFormat, buf.length);
-        SoundUtil.volume(line, volume);
+        volume(line, volume);
         line.start();
         int r;
         while (true) {
@@ -271,9 +273,11 @@ Debug.println("pageOut: " + r);
                 if (bytes == 0 && i < 2) {
                     throw new IllegalStateException("End of file before finding all Vorbis headers!");
                 }
-                Pointer p = OggLibrary.INSTANCE.ogg_sync_buffer(oy, new NativeLong(bytes));
-                p.write(0, buffer, 0, bytes);
-                OggLibrary.INSTANCE.ogg_sync_wrote(oy, new NativeLong(bytes));
+                if (bytes != -1) {
+                    Pointer p = OggLibrary.INSTANCE.ogg_sync_buffer(oy, new NativeLong(bytes));
+                    p.write(0, buffer, 0, bytes);
+                    OggLibrary.INSTANCE.ogg_sync_wrote(oy, new NativeLong(bytes));
+                }
             }
 
 			// Throw the comments plus a few lines about the bitstream we're decoding
@@ -334,6 +338,7 @@ Debug.print("comments: " + astrComments.length);
 
                                 PointerByReference pp = new PointerByReference();
                                 while ((samples = VorbisLibrary.INSTANCE.vorbis_synthesis_pcmout(vd, pp)) > 0) {
+Debug.println("samples: " + samples);
                                     Pointer ppChannels = pp.getValue();
                                     Pointer[] pChannels = ppChannels.getPointerArray(0, vi.channels);
 
@@ -341,7 +346,6 @@ Debug.print("comments: " + astrComments.length);
                                         pcm[k] = pChannels[k].getFloatArray(0, samples);
                                     }
 
-                                    int j;
                                     boolean clipflag = false;
                                     int bout = Math.min(samples, convsize);
 
@@ -349,7 +353,7 @@ Debug.print("comments: " + astrComments.length);
                                     for (i = 0; i < nChannels; i++) {
                                         int ptr = i;
                                         //float *mono = pcm[i];
-                                        for (j = 0; j < bout; j++) {
+                                        for (int j = 0; j < bout; j++) {
                                             int val = Math.round(pcm[i][j] * 32767.0F);
                                             // might as well guard against clipping
                                             if (val > 32767) {

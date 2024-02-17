@@ -57,6 +57,7 @@ public class VorbisEncoder {
         }
     }
 
+    // TODO crash
     @Test
     void test1() throws Exception {
         Path out = Path.of("tmp", "out.ogg");
@@ -103,7 +104,7 @@ public class VorbisEncoder {
         try {
             ais = AudioSystem.getAudioInputStream(new BufferedInputStream(Files.newInputStream(wav)));
         } catch (UnsupportedAudioFileException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
         AudioFormat format = ais.getFormat();
         if (format.getChannels() != 2 || format.getSampleSizeInBits() != 16) {
@@ -124,7 +125,7 @@ public class VorbisEncoder {
 
         // add a comment
         VorbisLibrary.INSTANCE.vorbis_comment_init(vc);
-        VorbisLibrary.INSTANCE.vorbis_comment_add_tag(vc, "ENCODER", "theora-java");
+        VorbisLibrary.INSTANCE.vorbis_comment_add_tag(vc, "ENCODER", "theora-java.test");
 
         // set up the analysis state and auxiliary encoding storage
         VorbisLibrary.INSTANCE.vorbis_analysis_init(vd, vi);
@@ -147,6 +148,7 @@ public class VorbisEncoder {
         ogg_packet header_comm = new ogg_packet();
         ogg_packet header_code = new ogg_packet();
 
+Debug.printf("%s, %s, %s, %s, %s%n", vd, vc, header, header_comm, header_code);
         VorbisLibrary.INSTANCE.vorbis_analysis_headerout(vd, vc, header, header_comm, header_code);
         OggLibrary.INSTANCE.ogg_stream_packetin(os, header); // automatically placed in its own page
         OggLibrary.INSTANCE.ogg_stream_packetin(os, header_comm);
@@ -162,7 +164,6 @@ public class VorbisEncoder {
             output.write(og.header.getByteArray(0, og.header_len.intValue()));
             output.write(og.body.getByteArray(0, og.body_len.intValue()));
         }
-
 
         while (!eos) {
             int bytes = ais.read(readbuffer, 0, READ * 4); // stereo hardwired here
@@ -197,7 +198,7 @@ public class VorbisEncoder {
                 long bufferPointerP = 0;
                 for (float[] floatArray : buffer) {
                     bufferPointer.write(bufferPointerP, floatArray, 0, bytes / 4);
-                    bufferPointerP += bytes / 4;
+                    bufferPointerP += bytes;
                 }
                 VorbisLibrary.INSTANCE.vorbis_analysis_wrote(vd, bytes / 4);
             }

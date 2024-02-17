@@ -1,6 +1,6 @@
 [![Release](https://jitpack.io/v/umjammer/theora-java.svg)](https://jitpack.io/#umjammer/theora-java)
 [![Java CI](https://github.com/umjammer/theora-java/actions/workflows/maven.yml/badge.svg)](https://github.com/umjammer/theora-java/actions/workflows/maven.yml)
-[![CodeQL](https://github.com/umjammer/theora-java/actions/workflows/codeql.yml/badge.svg)](https://github.com/umjammer/theora-java/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/umjammer/theora-java/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/umjammer/theora-java/actions/workflows/codeql-analysis.yml)
 ![Java](https://img.shields.io/badge/Java-17-b07219)
 
 # theora-java

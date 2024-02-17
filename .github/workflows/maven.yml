@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
 
-    runs-on: macos-14
+    runs-on: macos-13
 
     steps:
       - name: Checkout repository
@@ -23,4 +23,6 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: |
+          brew install vorbis
+          mvn -B package --file pom.xml
